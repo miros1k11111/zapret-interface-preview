@@ -1,0 +1,2695 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'none'; base-uri 'none'; form-action 'none'"
+    />
+    <title>Zapret Control Center</title>
+    <style>
+:root {
+  color-scheme: dark;
+  --bg: #07111f;
+  --bg-deep: #050b14;
+  --panel: rgba(13, 29, 48, 0.78);
+  --panel-solid: #0d1d30;
+  --panel-raised: #10263d;
+  --line: rgba(151, 184, 213, 0.13);
+  --line-bright: rgba(121, 228, 210, 0.25);
+  --text: #eef7ff;
+  --muted: #90a7bd;
+  --subtle: #60788f;
+  --primary: #72e6d0;
+  --primary-deep: #2fb7aa;
+  --primary-ink: #062420;
+  --cyan: #72c9ff;
+  --green: #64e1a9;
+  --yellow: #f4c970;
+  --red: #ff8f9d;
+  --shadow: 0 24px 64px rgba(0, 0, 0, 0.26);
+  --radius-xl: 24px;
+  --radius-lg: 18px;
+  --radius-md: 13px;
+  --radius-sm: 10px;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  min-height: 100%;
+  margin: 0;
+  background: var(--bg);
+}
+
+body {
+  color: var(--text);
+  overflow: hidden;
+  font-size: 14px;
+  letter-spacing: 0.005em;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+button {
+  color: inherit;
+}
+
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+.ambient {
+  position: fixed;
+  pointer-events: none;
+  border-radius: 999px;
+  filter: blur(80px);
+  opacity: 0.16;
+  z-index: 0;
+}
+
+.ambient-one {
+  width: 460px;
+  height: 460px;
+  background: #0eafc6;
+  top: -220px;
+  right: 8%;
+}
+
+.ambient-two {
+  width: 430px;
+  height: 430px;
+  background: #2673e8;
+  bottom: -250px;
+  left: 14%;
+  opacity: 0.11;
+}
+
+.app-shell {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: 272px minmax(0, 1fr);
+  height: 100vh;
+}
+
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  min-width: 0;
+  padding: 28px 18px 20px;
+  background: rgba(5, 14, 26, 0.88);
+  border-right: 1px solid rgba(151, 184, 213, 0.1);
+  backdrop-filter: blur(18px);
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 0 10px;
+}
+
+.brand-mark {
+  display: grid;
+  width: 41px;
+  height: 41px;
+  place-items: center;
+  color: var(--primary);
+  border: 1px solid rgba(114, 230, 208, 0.35);
+  border-radius: 14px;
+  box-shadow: inset 0 0 20px rgba(114, 230, 208, 0.09), 0 10px 28px rgba(0, 0, 0, 0.26);
+}
+
+.brand-mark svg {
+  width: 27px;
+  height: 27px;
+}
+
+.brand strong {
+  display: block;
+  color: #f6fcff;
+  font-size: 16px;
+  font-weight: 750;
+  line-height: 1.1;
+  letter-spacing: 0.015em;
+}
+
+.brand span {
+  display: block;
+  margin-top: 4px;
+  color: #83a3ba;
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+}
+
+.nav-list {
+  display: grid;
+  gap: 6px;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  width: 100%;
+  min-height: 47px;
+  padding: 0 12px;
+  color: #8fa8be;
+  text-align: left;
+  border: 1px solid transparent;
+  border-radius: 13px;
+  background: transparent;
+  cursor: pointer;
+  transition: color 150ms ease, background 150ms ease, border-color 150ms ease, transform 150ms ease;
+}
+
+.nav-item:hover {
+  color: #d7e6f1;
+  background: rgba(99, 145, 180, 0.07);
+}
+
+.nav-item.is-active {
+  color: #eafffb;
+  border-color: rgba(114, 230, 208, 0.17);
+  background: linear-gradient(90deg, rgba(67, 182, 168, 0.21), rgba(67, 182, 168, 0.055));
+  box-shadow: inset 3px 0 0 var(--primary);
+}
+
+.nav-icon {
+  display: inline-grid;
+  width: 21px;
+  place-items: center;
+  color: currentColor;
+  font-size: 19px;
+  line-height: 1;
+}
+
+.sidebar-bottom {
+  display: grid;
+  gap: 15px;
+  margin-top: auto;
+}
+
+.upstream-card {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-width: 0;
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: rgba(18, 39, 61, 0.48);
+}
+
+.upstream-icon {
+  display: grid;
+  width: 29px;
+  height: 29px;
+  flex: 0 0 auto;
+  place-items: center;
+  color: var(--cyan);
+  background: rgba(114, 201, 255, 0.1);
+  border-radius: 9px;
+  font-size: 15px;
+}
+
+.upstream-card > div:nth-child(2) {
+  min-width: 0;
+  flex: 1;
+}
+
+.upstream-card b,
+.upstream-card span {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.upstream-card b {
+  color: #dcebf6;
+  font-size: 11px;
+}
+
+.upstream-card span {
+  margin-top: 3px;
+  color: var(--subtle);
+  font-size: 10px;
+}
+
+.sidebar-note {
+  margin: 0 8px;
+  color: #637a8f;
+  font-size: 10px;
+  line-height: 1.5;
+}
+
+.main-area {
+  display: grid;
+  min-width: 0;
+  grid-template-rows: 78px minmax(0, 1fr);
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  min-width: 0;
+  padding: 0 35px;
+  border-bottom: 1px solid rgba(151, 184, 213, 0.1);
+  background: rgba(7, 17, 31, 0.62);
+  backdrop-filter: blur(16px);
+}
+
+.crumbs {
+  display: grid;
+  gap: 3px;
+}
+
+.eyebrow {
+  color: #7891a7;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+#page-title {
+  color: #ecf6ff;
+  font-size: 17px;
+  font-weight: 720;
+}
+
+.top-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.root-pill {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  max-width: min(510px, 47vw);
+  min-height: 40px;
+  padding: 0 11px;
+  color: #b7c9d7;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: rgba(13, 31, 50, 0.7);
+  cursor: pointer;
+  transition: border-color 150ms ease, background 150ms ease;
+}
+
+.root-pill:hover {
+  border-color: rgba(114, 230, 208, 0.32);
+  background: rgba(18, 45, 64, 0.88);
+}
+
+.root-pill > span:nth-child(2) {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.root-led {
+  width: 8px;
+  height: 8px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  background: #6a8193;
+  box-shadow: 0 0 0 4px rgba(106, 129, 147, 0.12);
+}
+
+.root-led.is-online {
+  background: var(--green);
+  box-shadow: 0 0 0 4px rgba(100, 225, 169, 0.12), 0 0 14px rgba(100, 225, 169, 0.4);
+}
+
+.root-change {
+  margin-left: 5px;
+  padding-left: 10px;
+  color: var(--primary);
+  border-left: 1px solid var(--line);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.icon-button {
+  display: inline-grid;
+  width: 40px;
+  height: 40px;
+  flex: 0 0 auto;
+  place-items: center;
+  color: #abc3d5;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: rgba(13, 31, 50, 0.7);
+  cursor: pointer;
+  transition: color 150ms ease, border-color 150ms ease, transform 150ms ease, background 150ms ease;
+}
+
+.icon-button:hover {
+  color: var(--primary);
+  border-color: rgba(114, 230, 208, 0.32);
+  background: rgba(18, 45, 64, 0.88);
+  transform: translateY(-1px);
+}
+
+.icon-button.compact {
+  width: 26px;
+  height: 26px;
+  border: 0;
+  background: transparent;
+  font-size: 14px;
+}
+
+.content-scroll {
+  min-width: 0;
+  min-height: 0;
+  overflow: auto;
+  padding: 33px 35px 44px;
+  scrollbar-color: #34546c transparent;
+  scrollbar-width: thin;
+}
+
+.page {
+  width: min(1210px, 100%);
+  margin: 0 auto;
+  animation: page-in 220ms ease-out both;
+}
+
+@keyframes page-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.page-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 25px;
+}
+
+.page-heading h1 {
+  max-width: 760px;
+  margin: 5px 0 7px;
+  color: #f5fbff;
+  font-size: clamp(25px, 3vw, 34px);
+  font-weight: 760;
+  letter-spacing: -0.035em;
+  line-height: 1.08;
+}
+
+.page-heading p {
+  max-width: 680px;
+  margin: 0;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+.kicker {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--primary);
+  font-size: 10px;
+  font-weight: 760;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+}
+
+.kicker::before {
+  width: 15px;
+  height: 1px;
+  content: "";
+  background: currentColor;
+}
+
+.button-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 9px;
+}
+
+.button {
+  display: inline-flex;
+  min-height: 40px;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 0 15px;
+  color: #dceaf3;
+  border: 1px solid transparent;
+  border-radius: 11px;
+  background: transparent;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 700;
+  transition: transform 150ms ease, box-shadow 150ms ease, background 150ms ease, border-color 150ms ease, color 150ms ease;
+}
+
+.button:hover {
+  transform: translateY(-1px);
+}
+
+.button:disabled,
+.icon-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+  transform: none;
+}
+
+.button-primary {
+  color: var(--primary-ink);
+  background: linear-gradient(135deg, #8af2dc, #58d8ca);
+  box-shadow: 0 7px 22px rgba(70, 212, 191, 0.18);
+}
+
+.button-primary:hover {
+  box-shadow: 0 10px 27px rgba(70, 212, 191, 0.28);
+}
+
+.button-secondary {
+  color: #d6eaf5;
+  border-color: rgba(114, 201, 255, 0.22);
+  background: rgba(66, 145, 195, 0.1);
+}
+
+.button-secondary:hover {
+  border-color: rgba(114, 201, 255, 0.45);
+  background: rgba(66, 145, 195, 0.17);
+}
+
+.button-ghost {
+  color: #b5cad9;
+  border-color: var(--line);
+  background: rgba(17, 37, 57, 0.56);
+}
+
+.button-ghost:hover {
+  color: #e4f1fa;
+  border-color: rgba(151, 184, 213, 0.3);
+  background: rgba(24, 50, 75, 0.78);
+}
+
+.button-danger {
+  color: #ffdce1;
+  border-color: rgba(255, 143, 157, 0.28);
+  background: rgba(170, 54, 73, 0.13);
+}
+
+.button-danger:hover {
+  border-color: rgba(255, 143, 157, 0.5);
+  background: rgba(170, 54, 73, 0.21);
+}
+
+.button-small {
+  min-height: 33px;
+  padding: 0 11px;
+  font-size: 11px;
+}
+
+.card {
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  background: linear-gradient(145deg, rgba(17, 38, 61, 0.86), rgba(10, 24, 41, 0.84));
+  box-shadow: 0 16px 44px rgba(0, 0, 0, 0.1);
+}
+
+.card-pad {
+  padding: 20px;
+}
+
+.hero-control {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 22px;
+  min-height: 150px;
+  margin-bottom: 18px;
+  padding: 24px 26px;
+  overflow: hidden;
+  border-color: rgba(114, 230, 208, 0.16);
+  background:
+    linear-gradient(100deg, rgba(29, 93, 97, 0.18), rgba(13, 30, 48, 0.84) 48%, rgba(13, 28, 47, 0.76)),
+    var(--panel);
+}
+
+.hero-control::after {
+  position: absolute;
+  width: 230px;
+  height: 230px;
+  right: -90px;
+  bottom: -160px;
+  content: "";
+  border: 1px solid rgba(114, 230, 208, 0.15);
+  border-radius: 50%;
+  box-shadow: 0 0 0 28px rgba(114, 230, 208, 0.025), 0 0 0 57px rgba(114, 230, 208, 0.018);
+}
+
+.status-orb {
+  display: grid;
+  width: 73px;
+  height: 73px;
+  flex: 0 0 auto;
+  place-items: center;
+  color: #50718a;
+  border: 1px solid rgba(111, 153, 180, 0.28);
+  border-radius: 50%;
+  background: rgba(47, 79, 103, 0.12);
+  box-shadow: inset 0 0 18px rgba(54, 91, 114, 0.24);
+}
+
+.status-orb::before {
+  width: 25px;
+  height: 25px;
+  content: "";
+  border-radius: 50%;
+  background: currentColor;
+  box-shadow: 0 0 0 8px rgba(91, 130, 153, 0.08);
+}
+
+.status-orb.is-running {
+  color: var(--green);
+  border-color: rgba(100, 225, 169, 0.45);
+  background: rgba(51, 161, 111, 0.11);
+  box-shadow: inset 0 0 20px rgba(100, 225, 169, 0.16), 0 0 28px rgba(66, 224, 163, 0.12);
+}
+
+.status-orb.is-running::before {
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  50% { box-shadow: 0 0 0 12px rgba(100, 225, 169, 0.02), 0 0 28px rgba(100, 225, 169, 0.75); }
+}
+
+.hero-copy {
+  position: relative;
+  z-index: 1;
+  min-width: 0;
+}
+
+.hero-copy .label,
+.metric-label,
+.field-label,
+.detail-label {
+  color: #7895aa;
+  font-size: 10px;
+  font-weight: 750;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
+.hero-copy h2 {
+  margin: 6px 0;
+  color: #f1fbff;
+  font-size: 23px;
+  font-weight: 740;
+  letter-spacing: -0.026em;
+}
+
+.hero-copy p {
+  max-width: 570px;
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.hero-actions {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  min-width: 205px;
+  gap: 8px;
+}
+
+.select-control,
+.text-input,
+.textarea-control {
+  width: 100%;
+  color: #eaf5fb;
+  border: 1px solid rgba(151, 184, 213, 0.16);
+  border-radius: 10px;
+  outline: none;
+  background: rgba(5, 17, 30, 0.52);
+  transition: border-color 150ms ease, background 150ms ease, box-shadow 150ms ease;
+}
+
+.select-control,
+.text-input {
+  min-height: 40px;
+  padding: 0 11px;
+}
+
+.select-control:hover,
+.text-input:hover,
+.textarea-control:hover {
+  border-color: rgba(114, 230, 208, 0.28);
+}
+
+.select-control:focus,
+.text-input:focus,
+.textarea-control:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(114, 230, 208, 0.1);
+}
+
+.metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 13px;
+}
+
+.metric-card {
+  min-height: 122px;
+  padding: 17px;
+}
+
+.metric-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.metric-icon {
+  display: grid;
+  width: 29px;
+  height: 29px;
+  place-items: center;
+  color: var(--cyan);
+  border-radius: 9px;
+  background: rgba(114, 201, 255, 0.1);
+  font-size: 15px;
+}
+
+.metric-icon.green { color: var(--green); background: rgba(100, 225, 169, 0.1); }
+.metric-icon.yellow { color: var(--yellow); background: rgba(244, 201, 112, 0.1); }
+.metric-icon.purple { color: #bf9dff; background: rgba(191, 157, 255, 0.1); }
+
+.metric-value {
+  display: block;
+  overflow: hidden;
+  margin-top: 14px;
+  color: #f2faff;
+  font-size: 16px;
+  font-weight: 740;
+  letter-spacing: -0.02em;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.metric-detail {
+  display: block;
+  overflow: hidden;
+  margin-top: 5px;
+  color: var(--muted);
+  font-size: 11px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dashboard-bottom-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(275px, 0.75fr);
+  gap: 17px;
+  margin-top: 17px;
+}
+
+.card-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 17px;
+}
+
+.card-heading h2,
+.card-heading h3 {
+  margin: 4px 0 0;
+  color: #eff8fe;
+  font-size: 16px;
+  letter-spacing: -0.015em;
+}
+
+.card-heading p {
+  margin: 5px 0 0;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.status-list {
+  display: grid;
+  gap: 0;
+}
+
+.status-row {
+  display: grid;
+  grid-template-columns: 12px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 11px;
+  min-height: 45px;
+  border-top: 1px solid rgba(151, 184, 213, 0.09);
+}
+
+.status-row:first-child { border-top: 0; }
+
+.status-row b,
+.status-row span {
+  display: block;
+}
+
+.status-row b {
+  color: #d9e9f3;
+  font-size: 12px;
+}
+
+.status-row span {
+  margin-top: 2px;
+  color: #7790a5;
+  font-size: 10px;
+}
+
+.status-row .value {
+  max-width: 190px;
+  overflow: hidden;
+  margin: 0;
+  color: #a9c3d4;
+  font-size: 11px;
+  text-align: right;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tiny-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #6a8193;
+}
+
+.tiny-dot.green { background: var(--green); box-shadow: 0 0 9px rgba(100, 225, 169, 0.65); }
+.tiny-dot.yellow { background: var(--yellow); }
+.tiny-dot.red { background: var(--red); }
+.tiny-dot.cyan { background: var(--cyan); }
+
+.info-callout {
+  display: flex;
+  gap: 12px;
+  padding: 15px;
+  color: #a4bacb;
+  border: 1px solid rgba(114, 201, 255, 0.15);
+  border-radius: 13px;
+  background: rgba(48, 108, 154, 0.08);
+  font-size: 12px;
+  line-height: 1.55;
+}
+
+.info-callout strong { color: #d9edff; }
+.info-callout.warning { border-color: rgba(244, 201, 112, 0.22); background: rgba(162, 112, 29, 0.09); }
+.info-callout.warning strong { color: #ffdfa1; }
+.info-callout.danger { border-color: rgba(255, 143, 157, 0.25); background: rgba(166, 54, 72, 0.1); }
+.info-callout.danger strong { color: #ffd6dc; }
+
+.callout-icon {
+  display: grid;
+  width: 23px;
+  height: 23px;
+  flex: 0 0 auto;
+  place-items: center;
+  color: var(--cyan);
+  border-radius: 50%;
+  background: rgba(114, 201, 255, 0.12);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.warning .callout-icon { color: var(--yellow); background: rgba(244, 201, 112, 0.12); }
+.danger .callout-icon { color: var(--red); background: rgba(255, 143, 157, 0.12); }
+
+.empty-state {
+  display: grid;
+  max-width: 710px;
+  min-height: 420px;
+  place-content: center;
+  justify-items: center;
+  gap: 16px;
+  margin: 4vh auto 0;
+  padding: 50px 30px;
+  text-align: center;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-xl);
+  background: linear-gradient(140deg, rgba(18, 42, 66, 0.83), rgba(8, 20, 34, 0.91));
+  box-shadow: var(--shadow);
+}
+
+.empty-symbol {
+  display: grid;
+  width: 76px;
+  height: 76px;
+  place-items: center;
+  color: var(--primary);
+  border: 1px solid rgba(114, 230, 208, 0.28);
+  border-radius: 23px;
+  background: rgba(51, 160, 148, 0.1);
+  box-shadow: inset 0 0 33px rgba(114, 230, 208, 0.08);
+  font-size: 31px;
+}
+
+.empty-state h1 {
+  margin: 4px 0 0;
+  color: #f4fbff;
+  font-size: 30px;
+  letter-spacing: -0.04em;
+}
+
+.empty-state p {
+  max-width: 515px;
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+.expect-list {
+  width: min(100%, 480px);
+  margin: 3px 0 8px;
+  padding: 0;
+  text-align: left;
+  list-style: none;
+}
+
+.expect-list li {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 8px 0;
+  color: #b8ccda;
+  border-top: 1px solid rgba(151, 184, 213, 0.1);
+  font-size: 12px;
+}
+
+.expect-list li::before {
+  content: "✓";
+  color: var(--primary);
+  font-weight: 800;
+}
+
+.platform-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 11px;
+  margin-bottom: 18px;
+  padding: 12px 15px;
+  color: #ffdca2;
+  border: 1px solid rgba(244, 201, 112, 0.24);
+  border-radius: 13px;
+  background: rgba(161, 110, 27, 0.1);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.platform-banner strong { color: #fff0cc; }
+
+.strategy-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 13px;
+}
+
+.strategy-card {
+  position: relative;
+  display: flex;
+  min-height: 178px;
+  flex-direction: column;
+  padding: 17px;
+  overflow: hidden;
+}
+
+.strategy-card::after {
+  position: absolute;
+  right: -23px;
+  top: -23px;
+  width: 90px;
+  height: 90px;
+  content: "";
+  border: 1px solid rgba(114, 201, 255, 0.1);
+  border-radius: 50%;
+}
+
+.strategy-card.is-selected {
+  border-color: rgba(114, 230, 208, 0.37);
+  background: linear-gradient(145deg, rgba(25, 69, 78, 0.83), rgba(11, 29, 45, 0.91));
+  box-shadow: inset 0 0 0 1px rgba(114, 230, 208, 0.07), 0 15px 35px rgba(0, 0, 0, 0.13);
+}
+
+.strategy-card-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  position: relative;
+  z-index: 1;
+}
+
+.strategy-name {
+  overflow: hidden;
+  color: #eaf5fa;
+  font-size: 14px;
+  font-weight: 730;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.strategy-card p {
+  position: relative;
+  z-index: 1;
+  min-height: 35px;
+  margin: 8px 0 13px;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+.strategy-card .button-row {
+  position: relative;
+  z-index: 1;
+  margin-top: auto;
+}
+
+.tag {
+  display: inline-flex;
+  min-height: 21px;
+  align-items: center;
+  padding: 0 7px;
+  color: #9ec2d8;
+  border: 1px solid rgba(114, 201, 255, 0.17);
+  border-radius: 999px;
+  background: rgba(114, 201, 255, 0.08);
+  font-size: 9px;
+  font-weight: 740;
+  letter-spacing: 0.055em;
+  text-transform: uppercase;
+}
+
+.tag.primary { color: #c5fff2; border-color: rgba(114, 230, 208, 0.22); background: rgba(114, 230, 208, 0.1); }
+.tag.warning { color: #ffe0a3; border-color: rgba(244, 201, 112, 0.24); background: rgba(244, 201, 112, 0.08); }
+.tag.red { color: #ffd5dc; border-color: rgba(255, 143, 157, 0.24); background: rgba(255, 143, 157, 0.08); }
+
+.strategy-counter {
+  margin-bottom: 17px;
+  color: #7895aa;
+  font-size: 12px;
+}
+
+.list-layout {
+  display: grid;
+  grid-template-columns: 240px minmax(0, 1fr);
+  gap: 17px;
+}
+
+.list-tabs {
+  display: grid;
+  align-content: start;
+  gap: 8px;
+  padding: 10px;
+}
+
+.list-tab {
+  width: 100%;
+  padding: 12px;
+  color: #9bb2c3;
+  text-align: left;
+  border: 1px solid transparent;
+  border-radius: 11px;
+  background: transparent;
+  cursor: pointer;
+  transition: color 150ms ease, background 150ms ease, border-color 150ms ease;
+}
+
+.list-tab b,
+.list-tab small {
+  display: block;
+}
+
+.list-tab b { font-size: 12px; }
+.list-tab small { margin-top: 4px; color: #637e94; font-size: 10px; line-height: 1.35; }
+
+.list-tab:hover { color: #d5e7f2; background: rgba(98, 147, 184, 0.08); }
+.list-tab.is-active { color: #e3fff9; border-color: rgba(114, 230, 208, 0.18); background: rgba(62, 174, 159, 0.13); }
+.list-tab.is-active small { color: #98cabe; }
+
+.list-editor {
+  display: grid;
+  min-width: 0;
+  grid-template-rows: auto auto minmax(260px, 1fr) auto;
+  gap: 13px;
+  padding: 20px;
+}
+
+.list-editor h2 { margin: 3px 0 0; font-size: 18px; letter-spacing: -0.02em; }
+.list-editor > p { margin: -5px 0 0; color: var(--muted); font-size: 12px; }
+
+.textarea-control {
+  min-height: 300px;
+  resize: vertical;
+  padding: 13px;
+  color: #dfeef8;
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  font-size: 12px;
+  line-height: 1.58;
+}
+
+.editor-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.editor-footer span { color: #7690a4; font-size: 11px; }
+
+.settings-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(320px, 0.9fr);
+  align-items: start;
+  gap: 17px;
+}
+
+.settings-stack {
+  display: grid;
+  gap: 17px;
+}
+
+.service-status-card {
+  display: grid;
+  gap: 14px;
+  padding: 20px;
+}
+
+.service-pill-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.service-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 30px;
+  padding: 0 10px;
+  color: #adc3d1;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: rgba(7, 19, 32, 0.5);
+  font-size: 11px;
+}
+
+.service-pill .tiny-dot { width: 6px; height: 6px; }
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 13px;
+}
+
+.form-field {
+  display: grid;
+  gap: 7px;
+}
+
+.field-label { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+
+.field-hint {
+  color: #617c91;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 15px 0;
+  border-top: 1px solid rgba(151, 184, 213, 0.1);
+}
+
+.toggle-row:first-child { padding-top: 0; border-top: 0; }
+
+.toggle-copy b,
+.toggle-copy span { display: block; }
+.toggle-copy b { color: #dbeaf4; font-size: 12px; }
+.toggle-copy span { max-width: 390px; margin-top: 4px; color: var(--muted); font-size: 11px; line-height: 1.45; }
+
+.switch {
+  position: relative;
+  display: inline-flex;
+  width: 42px;
+  height: 24px;
+  flex: 0 0 auto;
+  border: 0;
+  border-radius: 999px;
+  background: #385268;
+  cursor: pointer;
+  transition: background 170ms ease;
+}
+
+.switch::after {
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  width: 16px;
+  height: 16px;
+  content: "";
+  border-radius: 50%;
+  background: #c4d5df;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.25);
+  transition: transform 170ms ease, background 170ms ease;
+}
+
+.switch.is-on { background: #35bca8; }
+.switch.is-on::after { transform: translateX(18px); background: #edfffb; }
+
+.segmented {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 5px;
+  padding: 4px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: rgba(6, 18, 31, 0.42);
+}
+
+.segmented button {
+  min-height: 33px;
+  padding: 0 6px;
+  color: #88a1b2;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: transparent;
+  cursor: pointer;
+  font-size: 10px;
+  font-weight: 700;
+  transition: color 150ms ease, background 150ms ease, border-color 150ms ease;
+}
+
+.segmented button:hover { color: #d5e6ef; }
+.segmented button.is-active { color: #d9fff6; border-color: rgba(114, 230, 208, 0.18); background: rgba(83, 195, 177, 0.16); }
+
+.update-overview {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(300px, 0.8fr);
+  gap: 17px;
+}
+
+.update-hero {
+  min-height: 230px;
+  padding: 23px;
+}
+
+.version-pair {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 12px;
+  margin: 20px 0 19px;
+}
+
+.version-box {
+  min-width: 0;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: rgba(5, 17, 30, 0.36);
+}
+
+.version-box span,
+.version-box b {
+  display: block;
+}
+
+.version-box span { color: #7893a8; font-size: 10px; text-transform: uppercase; letter-spacing: 0.07em; font-weight: 700; }
+.version-box b { overflow: hidden; margin-top: 6px; color: #e9f7fc; font-size: 17px; text-overflow: ellipsis; white-space: nowrap; }
+.version-arrow { color: var(--primary); font-size: 23px; }
+
+.progress-panel {
+  display: grid;
+  align-content: center;
+  gap: 12px;
+  min-height: 230px;
+  padding: 23px;
+}
+
+.progress-panel h3 { margin: 0; color: #e8f6fc; font-size: 16px; }
+.progress-panel p { min-height: 37px; margin: 0; color: var(--muted); font-size: 12px; line-height: 1.5; }
+
+.progress-track {
+  height: 7px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(105, 143, 169, 0.18);
+}
+
+.progress-track span {
+  display: block;
+  width: 0;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--primary-deep), var(--primary));
+  box-shadow: 0 0 14px rgba(114, 230, 208, 0.45);
+  transition: width 220ms ease;
+}
+
+.progress-meta { color: #7590a5; font-size: 11px; }
+
+.update-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 17px;
+}
+
+.update-stat {
+  padding: 15px;
+}
+
+.update-stat b,
+.update-stat span { display: block; }
+.update-stat b { color: #effaff; font-size: 22px; letter-spacing: -0.04em; }
+.update-stat span { margin-top: 3px; color: #7892a8; font-size: 10px; line-height: 1.35; }
+
+.update-details {
+  display: grid;
+  gap: 11px;
+  margin-top: 17px;
+}
+
+.update-details details {
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 13px;
+  background: rgba(9, 24, 40, 0.5);
+}
+
+.update-details summary {
+  display: flex;
+  align-items: center;
+  min-height: 46px;
+  padding: 0 15px;
+  color: #cee0eb;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 680;
+  list-style: none;
+}
+
+.update-details summary::-webkit-details-marker { display: none; }
+.update-details summary::after { margin-left: auto; content: "+"; color: var(--primary); font-size: 18px; font-weight: 400; }
+.update-details details[open] summary { border-bottom: 1px solid var(--line); }
+.update-details details[open] summary::after { content: "−"; }
+
+.file-list {
+  max-height: 240px;
+  margin: 0;
+  padding: 7px 15px 12px;
+  overflow: auto;
+  list-style: none;
+}
+
+.file-list li {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 13px;
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(151, 184, 213, 0.08);
+  color: #9db7c9;
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  font-size: 11px;
+}
+
+.file-list li:last-child { border-bottom: 0; }
+.file-list li span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.file-list li em { color: #738ea3; font-family: inherit; font-style: normal; }
+.file-list.conflict li { grid-template-columns: minmax(0, 1fr); }
+.file-list.conflict strong { color: #ffd5a2; font-family: inherit; font-size: 10px; font-weight: 600; }
+
+.update-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+  margin-top: 17px;
+}
+
+.first-sync-note {
+  margin-top: 17px;
+}
+
+.loading-card {
+  display: grid;
+  min-height: 260px;
+  place-items: center;
+  padding: 30px;
+  color: var(--muted);
+  text-align: center;
+}
+
+.spinner {
+  width: 31px;
+  height: 31px;
+  margin-bottom: 13px;
+  border: 3px solid rgba(114, 230, 208, 0.16);
+  border-top-color: var(--primary);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.toast-stack {
+  position: fixed;
+  right: 22px;
+  bottom: 22px;
+  z-index: 10;
+  display: grid;
+  width: min(390px, calc(100vw - 36px));
+  gap: 9px;
+}
+
+.toast {
+  display: grid;
+  grid-template-columns: 21px minmax(0, 1fr) auto;
+  align-items: start;
+  gap: 9px;
+  padding: 12px;
+  color: #d6e5ed;
+  border: 1px solid var(--line);
+  border-radius: 13px;
+  background: rgba(10, 28, 45, 0.95);
+  box-shadow: 0 15px 38px rgba(0, 0, 0, 0.28);
+  backdrop-filter: blur(15px);
+  animation: toast-in 220ms ease-out both;
+}
+
+@keyframes toast-in { from { opacity: 0; transform: translateX(12px); } to { opacity: 1; transform: translateX(0); } }
+
+.toast-icon { display: grid; width: 21px; height: 21px; place-items: center; color: var(--primary); border-radius: 50%; background: rgba(114, 230, 208, 0.12); font-size: 11px; font-weight: 800; }
+.toast.error .toast-icon { color: var(--red); background: rgba(255, 143, 157, 0.13); }
+.toast.warning .toast-icon { color: var(--yellow); background: rgba(244, 201, 112, 0.13); }
+.toast-copy { color: #cce0eb; font-size: 12px; line-height: 1.45; }
+.toast-close { width: 20px; height: 20px; padding: 0; color: #718ca0; border: 0; background: transparent; cursor: pointer; }
+
+.confirm-dialog {
+  width: min(470px, calc(100vw - 34px));
+  padding: 0;
+  color: var(--text);
+  border: 1px solid rgba(151, 184, 213, 0.18);
+  border-radius: 20px;
+  background: #0d2034;
+  box-shadow: 0 28px 80px rgba(0, 0, 0, 0.5);
+}
+
+.confirm-dialog::backdrop { background: rgba(2, 8, 15, 0.65); backdrop-filter: blur(3px); }
+
+.dialog-surface { padding: 23px; }
+.dialog-kicker { color: var(--primary); font-size: 10px; font-weight: 780; letter-spacing: 0.13em; text-transform: uppercase; }
+.dialog-surface h2 { margin: 8px 0 9px; color: #f0faff; font-size: 20px; letter-spacing: -0.025em; }
+.dialog-surface p { margin: 0; color: var(--muted); font-size: 13px; line-height: 1.55; white-space: pre-line; }
+.dialog-actions { display: flex; justify-content: flex-end; gap: 9px; margin-top: 23px; }
+
+.muted { color: var(--muted); }
+.hidden { display: none !important; }
+
+@media (max-width: 1160px) {
+  .strategy-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .metrics-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .update-summary-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 900px) {
+  body { overflow: auto; }
+  .app-shell { grid-template-columns: 1fr; height: auto; min-height: 100vh; }
+  .sidebar { position: sticky; top: 0; z-index: 4; flex-direction: row; align-items: center; gap: 15px; padding: 12px 15px; border-right: 0; border-bottom: 1px solid var(--line); }
+  .nav-list { display: flex; flex: 1; gap: 3px; overflow: auto; }
+  .nav-item { width: auto; min-height: 37px; flex: 0 0 auto; padding: 0 9px; font-size: 12px; }
+  .nav-item .nav-icon { display: none; }
+  .sidebar-bottom { display: none; }
+  .brand { padding: 0; }
+  .brand-mark { width: 34px; height: 34px; border-radius: 11px; }
+  .brand-mark svg { width: 22px; height: 22px; }
+  .brand span { display: none; }
+  .main-area { grid-template-rows: 64px minmax(0, 1fr); }
+  .topbar { padding: 0 18px; }
+  .content-scroll { padding: 25px 18px 34px; overflow: visible; }
+  .dashboard-bottom-grid,
+  .settings-layout,
+  .update-overview { grid-template-columns: 1fr; }
+  .list-layout { grid-template-columns: 1fr; }
+  .list-tabs { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .list-tab { padding: 9px; }
+  .list-tab small { display: none; }
+}
+
+@media (max-width: 620px) {
+  .sidebar { align-items: flex-start; flex-wrap: wrap; }
+  .nav-list { order: 2; width: 100%; flex-basis: 100%; }
+  .main-area { grid-template-rows: auto minmax(0, 1fr); }
+  .topbar { min-height: 58px; padding: 11px 15px; }
+  .top-actions { gap: 6px; }
+  .root-pill { max-width: 58vw; min-height: 36px; font-size: 11px; }
+  .root-change { display: none; }
+  .content-scroll { padding: 20px 14px 30px; }
+  .page-heading { display: block; }
+  .page-heading .button-row { margin-top: 15px; }
+  .hero-control { grid-template-columns: auto minmax(0, 1fr); gap: 14px; padding: 18px; }
+  .hero-actions { grid-column: 1 / -1; min-width: 0; }
+  .metrics-grid,
+  .strategy-grid,
+  .update-summary-grid,
+  .form-grid { grid-template-columns: 1fr; }
+  .list-tabs { grid-template-columns: 1fr; }
+  .list-tab small { display: block; }
+  .version-pair { grid-template-columns: 1fr; gap: 7px; }
+  .version-arrow { transform: rotate(90deg); text-align: center; }
+  .editor-footer { align-items: flex-start; flex-direction: column; }
+  .toggle-row { align-items: flex-start; }
+}
+
+.pages-demo-badge {
+  position: fixed;
+  right: 18px;
+  bottom: 17px;
+  z-index: 9;
+  padding: 7px 10px;
+  color: #9aeadd;
+  border: 1px solid rgba(114, 230, 208, 0.26);
+  border-radius: 999px;
+  background: rgba(5, 20, 31, 0.82);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.28);
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  pointer-events: none;
+}
+
+@media (max-width: 620px) {
+  .pages-demo-badge { right: 12px; bottom: 12px; font-size: 8px; }
+}
+
+</style>
+      <meta name="description" content="Интерактивный предпросмотр Zapret Control Center" />
+  </head>
+  <body>
+    <div class="ambient ambient-one"></div>
+    <div class="ambient ambient-two"></div>
+    <div class="app-shell">
+      <aside class="sidebar" aria-label="Основная навигация">
+        <div class="brand">
+          <div class="brand-mark" aria-hidden="true">
+            <svg viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M18 3.5 30.5 8v8.9c0 7.9-5 13-12.5 15.6C10.5 29.9 5.5 24.8 5.5 16.9V8L18 3.5Z" stroke="currentColor" stroke-width="2.5"/>
+              <path d="m11.7 18.1 4 4 8.6-9" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <div>
+            <strong>Zapret</strong>
+            <span>CONTROL CENTER</span>
+          </div>
+        </div>
+
+        <nav class="nav-list">
+          <button class="nav-item is-active" type="button" data-view="dashboard">
+            <span class="nav-icon">◈</span><span>Обзор</span>
+          </button>
+          <button class="nav-item" type="button" data-view="strategies">
+            <span class="nav-icon">⌁</span><span>Стратегии</span>
+          </button>
+          <button class="nav-item" type="button" data-view="lists">
+            <span class="nav-icon">☷</span><span>Списки</span>
+          </button>
+          <button class="nav-item" type="button" data-view="updates">
+            <span class="nav-icon">↻</span><span>Обновления</span>
+          </button>
+          <button class="nav-item" type="button" data-view="service">
+            <span class="nav-icon">⚙</span><span>Служба и фильтры</span>
+          </button>
+        </nav>
+
+        <div class="sidebar-bottom">
+          <div class="upstream-card">
+            <div class="upstream-icon">↗</div>
+            <div>
+              <b>Flowseal upstream</b>
+              <span>Официальный источник</span>
+            </div>
+            <button class="icon-button compact" type="button" data-action="open-upstream" aria-label="Открыть Flowseal на GitHub">↗</button>
+          </div>
+          <p class="sidebar-note">Интерфейс не содержит движок zapret и работает с выбранной распакованной папкой.</p>
+        </div>
+      </aside>
+
+      <main class="main-area">
+        <header class="topbar">
+          <div class="crumbs">
+            <span class="eyebrow">Локальный контроллер</span>
+            <span id="page-title">Обзор</span>
+          </div>
+          <div class="top-actions">
+            <button class="root-pill" type="button" data-action="choose-root" title="Выбрать папку zapret">
+              <span class="root-led" id="root-led"></span>
+              <span id="root-label">Папка zapret не выбрана</span>
+              <span class="root-change">Изменить</span>
+            </button>
+            <button class="icon-button" type="button" data-action="refresh" aria-label="Обновить данные" title="Обновить данные">↻</button>
+          </div>
+        </header>
+
+        <section class="content-scroll" id="content" aria-live="polite"></section>
+        <div class="pages-demo-badge" aria-label="Демонстрационный режим">DEMO · тестовые данные</div>
+      </main>
+    </div>
+
+    <div class="toast-stack" id="toast-stack" aria-live="polite" aria-atomic="true"></div>
+
+    <dialog class="confirm-dialog" id="confirm-dialog" aria-labelledby="confirm-title">
+      <form method="dialog" class="dialog-surface">
+        <div class="dialog-kicker" id="confirm-kicker">Подтверждение</div>
+        <h2 id="confirm-title">Продолжить?</h2>
+        <p id="confirm-message"></p>
+        <div class="dialog-actions">
+          <button class="button button-ghost" value="cancel">Отмена</button>
+          <button class="button button-primary" id="confirm-submit" value="confirm">Подтвердить</button>
+        </div>
+      </form>
+    </dialog>
+
+    <script>
+"use strict";
+
+/*
+ * GitHub Pages cannot and must not call the local Electron API. This adapter
+ * makes the published page an interactive visual preview without executing
+ * zapret, requesting admin rights, or changing any visitor files.
+ */
+(() => {
+  const clone = (value) => JSON.parse(JSON.stringify(value));
+  let progressListener = null;
+
+  const overview = {
+    platform: "win32",
+    supportedPlatform: true,
+    configured: true,
+    root: "C:\\Tools\\zapret-discord-youtube",
+    validation: { valid: true, root: "C:\\Tools\\zapret-discord-youtube" },
+    version: "1.10.4",
+    strategies: [
+      "general.bat",
+      "general (ALT).bat",
+      "general (ALT2).bat",
+      "general (FAKE TLS AUTO).bat",
+      "general (SIMPLE FAKE).bat",
+      "general (EXP).bat",
+    ],
+    gameFilter: { mode: "disabled", tcp: "1024-65535", udp: "1024-65535", enabled: false },
+    ipset: { mode: "loaded", entries: 18426 },
+    autoUpdate: true,
+    runtime: {
+      processRunning: true,
+      serviceInstalled: true,
+      serviceRunning: true,
+      serviceStrategy: "general",
+    },
+  };
+
+  const lists = {
+    general: {
+      path: "lists/list-general-user.txt",
+      title: "Свои домены",
+      subtitle: "Домены, которые нужно добавить в обход",
+      placeholder: "example.org",
+      content: "# Мои правила\nexample.org\nmedia.example.org\n",
+      exists: true,
+    },
+    excludedDomains: {
+      path: "lists/list-exclude-user.txt",
+      title: "Исключённые домены",
+      subtitle: "Домены, которые не должны попадать под фильтр",
+      placeholder: "example.org",
+      content: "# Исключения\nbank.example.org\n",
+      exists: true,
+    },
+    excludedIps: {
+      path: "lists/ipset-exclude-user.txt",
+      title: "Исключённые IP и подсети",
+      subtitle: "IP-адреса и CIDR-подсети, которые не нужно фильтровать",
+      placeholder: "203.0.113.0/24",
+      content: "203.0.113.0/24\n",
+      exists: true,
+    },
+  };
+
+  const plan = {
+    fingerprint: "pages-demo-plan",
+    checkedAt: new Date().toISOString(),
+    initial: false,
+    localVersion: "1.10.4",
+    upstream: {
+      repository: "Flowseal/zapret-discord-youtube",
+      branch: "main",
+      treeSha: "pages-demo-tree",
+      version: "1.10.5",
+      release: {
+        tag: "1.10.5",
+        url: "https://github.com/Flowseal/zapret-discord-youtube",
+        publishedAt: "2026-11-20T12:00:00Z",
+      },
+    },
+    summary: { update: 7, conflicts: 1, protected: 5, current: 61 },
+    actions: [
+      { path: "service.bat", kind: "replace", reason: "обновлён upstream", remoteSha: "demo", expectedLocalSha: "demo", size: 1200 },
+      { path: "general.bat", kind: "replace", reason: "обновлён upstream", remoteSha: "demo", expectedLocalSha: "demo", size: 900 },
+      { path: "general (ALT).bat", kind: "replace", reason: "обновлён upstream", remoteSha: "demo", expectedLocalSha: "demo", size: 880 },
+      { path: "bin/winws.exe", kind: "replace", reason: "обновлён upstream", remoteSha: "demo", expectedLocalSha: "demo", size: 817000 },
+      { path: "lists/list-general.txt", kind: "replace", reason: "обновлён upstream", remoteSha: "demo", expectedLocalSha: "demo", size: 23400 },
+      { path: "utils/test zapret.ps1", kind: "replace", reason: "обновлён upstream", remoteSha: "demo", expectedLocalSha: "demo", size: 48400 },
+      { path: "general (ALT14).bat", kind: "add", reason: "новый файл upstream", remoteSha: "demo", expectedLocalSha: null, size: 870 },
+    ],
+    conflicts: [
+      { path: "README.md", reason: "файл менялся и локально, и в upstream", suggestedAction: "replace", localSha: "demo", remoteSha: "demo" },
+    ],
+    preserved: [
+      { path: "lists/list-general-user.txt", reason: "пользовательские настройки" },
+      { path: "lists/list-exclude-user.txt", reason: "пользовательские настройки" },
+      { path: "lists/ipset-exclude-user.txt", reason: "пользовательские настройки" },
+      { path: "lists/ipset-all.txt", reason: "пользовательские настройки" },
+      { path: "utils/game_filter.enabled", reason: "пользовательские настройки" },
+    ],
+  };
+
+  const success = (data) => Promise.resolve({ ok: true, data: clone(data) });
+  const notify = (phase, label, current, total, path) => {
+    if (progressListener) progressListener({ phase, label, current, total, path });
+  };
+
+  window.zapretAPI = {
+    getOverview: () => success(overview),
+    chooseRoot: () => {
+      overview.configured = true;
+      return success({ canceled: false, overview });
+    },
+    forgetRoot: () => {
+      overview.configured = false;
+      return success(overview);
+    },
+    launch: () => {
+      overview.runtime.processRunning = true;
+      return success({ accepted: true });
+    },
+    stop: () => {
+      overview.runtime.processRunning = false;
+      return success({ accepted: true });
+    },
+    openServiceManager: () => success({ accepted: true }),
+    openFolder: () => success({ opened: true }),
+    openUpstream: () => {
+      window.open("https://github.com/Flowseal/zapret-discord-youtube", "_blank", "noopener");
+      return success({ opened: true });
+    },
+    getUserLists: () => success(lists),
+    saveUserList: (key, content) => {
+      lists[key].content = content;
+      lists[key].exists = true;
+      return success(lists);
+    },
+    setGameFilter: (settings) => {
+      overview.gameFilter = { ...overview.gameFilter, ...settings, enabled: settings.mode !== "disabled" };
+      return success(overview.gameFilter);
+    },
+    setIpSetMode: (mode) => {
+      overview.ipset.mode = mode;
+      overview.ipset.entries = mode === "loaded" ? 18426 : mode === "none" ? 1 : 0;
+      return success(overview.ipset);
+    },
+    setAutoUpdate: (enabled) => {
+      overview.autoUpdate = Boolean(enabled);
+      return success(overview.autoUpdate);
+    },
+    checkUpdate: () => {
+      notify("checking", "Сверяем контрольные суммы локальных файлов", 71, 71);
+      return success(plan);
+    },
+    applyUpdate: () => {
+      notify("download", "Скачиваем только изменённые файлы", 7, 7, "general (ALT14).bat");
+      notify("apply", "Применяем подготовленные файлы", 7, 7, "general (ALT14).bat");
+      overview.version = "1.10.5";
+      notify("done", "Готово: обновлено файлов — 7", 7, 7);
+      return success({
+        applied: plan.actions.map((item) => ({ path: item.path, kind: item.kind })),
+        backupSession: "pages-demo-backup-session",
+      });
+    },
+    onUpdateProgress: (callback) => {
+      progressListener = callback;
+      return () => {
+        if (progressListener === callback) progressListener = null;
+      };
+    },
+  };
+})();
+
+</script>
+    <script>
+"use strict";
+
+(() => {
+  const api = window.zapretAPI;
+  const content = document.getElementById("content");
+  const pageTitle = document.getElementById("page-title");
+  const rootLabel = document.getElementById("root-label");
+  const rootLed = document.getElementById("root-led");
+  const toastStack = document.getElementById("toast-stack");
+  const confirmDialog = document.getElementById("confirm-dialog");
+  const confirmKicker = document.getElementById("confirm-kicker");
+  const confirmTitle = document.getElementById("confirm-title");
+  const confirmMessage = document.getElementById("confirm-message");
+  const confirmSubmit = document.getElementById("confirm-submit");
+
+  const VIEW_TITLES = {
+    dashboard: "Обзор",
+    strategies: "Стратегии",
+    lists: "Списки",
+    updates: "Обновления",
+    service: "Служба и фильтры",
+  };
+
+  const FALLBACK_LISTS = {
+    general: {
+      title: "Свои домены",
+      subtitle: "Домены, которые нужно добавить в обход",
+      placeholder: "example.org",
+      content: "",
+      exists: false,
+    },
+    excludedDomains: {
+      title: "Исключённые домены",
+      subtitle: "Домены, которые не должны попадать под фильтр",
+      placeholder: "example.org",
+      content: "",
+      exists: false,
+    },
+    excludedIps: {
+      title: "Исключённые IP и подсети",
+      subtitle: "IP-адреса и CIDR-подсети, которые не нужно фильтровать",
+      placeholder: "203.0.113.0/24",
+      content: "",
+      exists: false,
+    },
+  };
+
+  const state = {
+    overview: null,
+    view: "dashboard",
+    selectedStrategy: null,
+    lists: null,
+    selectedList: "general",
+    listsLoading: false,
+    updatePlan: null,
+    checkingUpdate: false,
+    updateProgress: null,
+    lastUpdateResult: null,
+    busy: null,
+  };
+
+  function escapeHtml(value) {
+    return String(value ?? "").replace(/[&<>"']/g, (character) => {
+      const entities = {
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#039;",
+      };
+      return entities[character];
+    });
+  }
+
+  function apiError(result) {
+    const error = new Error(result?.error?.message || "Операция не выполнена.");
+    error.code = result?.error?.code || "UNEXPECTED_ERROR";
+    error.details = result?.error?.details;
+    return error;
+  }
+
+  async function request(method, ...args) {
+    if (!api || typeof api[method] !== "function") {
+      throw new Error("Безопасный мост Electron недоступен. Перезапустите приложение.");
+    }
+    const result = await api[method](...args);
+    if (!result?.ok) throw apiError(result);
+    return result.data;
+  }
+
+  function isConfigured() {
+    return Boolean(state.overview?.configured);
+  }
+
+  function isWindowsSupported() {
+    return Boolean(state.overview?.supportedPlatform);
+  }
+
+  function ensureStrategy() {
+    const strategies = state.overview?.strategies || [];
+    if (!strategies.length) {
+      state.selectedStrategy = null;
+      return;
+    }
+    if (!strategies.includes(state.selectedStrategy)) {
+      state.selectedStrategy = strategies.includes("general.bat") ? "general.bat" : strategies[0];
+    }
+  }
+
+  function rootCaption(overview) {
+    if (!overview?.configured) return "Папка zapret не выбрана";
+    return overview.root || "Папка zapret выбрана";
+  }
+
+  function updateChrome() {
+    const overview = state.overview;
+    pageTitle.textContent = VIEW_TITLES[state.view] || "Zapret";
+    rootLabel.textContent = rootCaption(overview);
+    rootLed.classList.toggle("is-online", Boolean(overview?.configured));
+    document.querySelectorAll("[data-view]").forEach((button) => {
+      button.classList.toggle("is-active", button.dataset.view === state.view);
+    });
+  }
+
+  function busyAttribute() {
+    return state.busy ? "disabled" : "";
+  }
+
+  function platformBanner() {
+    if (isWindowsSupported()) return "";
+    return `
+      <div class="platform-banner">
+        <span class="callout-icon">!</span>
+        <div><strong>Режим просмотра.</strong> Управление winws.exe, службой и UAC доступно в Windows. Файлы и механизм дифференциального обновления можно просмотреть, но запуск на ${escapeHtml(state.overview?.platform || "этой ОС")} не выполняется.</div>
+      </div>`;
+  }
+
+  function renderLoading(label = "Загружаем состояние папки…") {
+    return `<div class="page"><div class="card loading-card"><div><div class="spinner"></div><div>${escapeHtml(label)}</div></div></div></div>`;
+  }
+
+  function renderOnboarding() {
+    const validation = state.overview?.validation;
+    const reason = validation?.reason;
+    return `
+      <section class="page">
+        <div class="empty-state">
+          <div class="empty-symbol">⌁</div>
+          <div class="kicker">Первый запуск</div>
+          <h1>Подключите папку zapret</h1>
+          <p>Укажите уже распакованную папку релиза <b>Flowseal/zapret-discord-youtube</b>. Приложение не устанавливает драйверы и не заменяет архивом всю папку.</p>
+          ${reason ? `<div class="info-callout warning"><span class="callout-icon">!</span><div><strong>Папка не готова.</strong> ${escapeHtml(reason)}</div></div>` : ""}
+          <ul class="expect-list">
+            <li>service.bat в корне выбранной папки</li>
+            <li>bin/winws.exe</li>
+            <li>папка lists</li>
+          </ul>
+          <div class="button-row">
+            <button class="button button-primary" type="button" data-action="choose-root">Выбрать папку zapret <span>→</span></button>
+            <button class="button button-ghost" type="button" data-action="open-upstream">Открыть официальный проект ↗</button>
+          </div>
+        </div>
+      </section>`;
+  }
+
+  function runtimeStateText(overview) {
+    const running = overview.runtime?.processRunning;
+    if (running === true) {
+      return { title: "Обход запущен", detail: "winws.exe активен; фильтрация применяется", running: true };
+    }
+    if (running === false) {
+      return { title: "Обход остановлен", detail: "Выберите стратегию и запустите её", running: false };
+    }
+    return { title: "Статус неизвестен", detail: "Проверка процессов доступна в Windows", running: false };
+  }
+
+  function gameModeLabel(gameFilter) {
+    const mode = gameFilter?.mode || "disabled";
+    const labels = {
+      disabled: "Выключен",
+      all: "TCP и UDP",
+      tcp: "Только TCP",
+      udp: "Только UDP",
+    };
+    return labels[mode] || "Неизвестно";
+  }
+
+  function ipsetLabel(ipset) {
+    const labels = {
+      loaded: "Список загружен",
+      none: "Не используется",
+      any: "Любой IP",
+      unknown: "Не определён",
+    };
+    return labels[ipset?.mode] || "Не определён";
+  }
+
+  function serviceLabel(runtime) {
+    if (runtime?.serviceRunning) return "Служба запущена";
+    if (runtime?.serviceInstalled) return "Служба установлена";
+    if (runtime?.serviceInstalled === false) return "Не установлена";
+    return "Нет данных";
+  }
+
+  function dotClass(value, optimistic = "cyan") {
+    if (value === true) return "green";
+    if (value === false) return "red";
+    return optimistic;
+  }
+
+  function renderDashboard(overview) {
+    const runtime = runtimeStateText(overview);
+    const strategyOptions = (overview.strategies || [])
+      .map(
+        (strategy) =>
+          `<option value="${escapeHtml(strategy)}" ${strategy === state.selectedStrategy ? "selected" : ""}>${escapeHtml(strategy.replace(/\.bat$/i, ""))}</option>`,
+      )
+      .join("");
+    const launchDisabled = !state.selectedStrategy || !isWindowsSupported() || busyAttribute();
+    const processDot = dotClass(overview.runtime?.processRunning);
+    const serviceDot = overview.runtime?.serviceRunning ? "green" : overview.runtime?.serviceInstalled ? "yellow" : "red";
+
+    return `
+      <section class="page">
+        ${platformBanner()}
+        <div class="page-heading">
+          <div>
+            <div class="kicker">Центр управления</div>
+            <h1>Ваш zapret — под контролем</h1>
+            <p>Запускайте стратегии, следите за службой и обновляйте только изменившиеся файлы без перезаписи личных списков.</p>
+          </div>
+          <div class="button-row">
+            <button class="button button-ghost" type="button" data-action="open-folder">Открыть папку</button>
+            <button class="button button-ghost" type="button" data-action="service-manager">Оригинальный менеджер ↗</button>
+          </div>
+        </div>
+
+        <article class="card hero-control">
+          <div class="status-orb ${runtime.running ? "is-running" : ""}"></div>
+          <div class="hero-copy">
+            <div class="label">Состояние защиты</div>
+            <h2>${runtime.title}</h2>
+            <p>${runtime.detail}</p>
+          </div>
+          <div class="hero-actions">
+            <select class="select-control" id="quick-strategy" aria-label="Стратегия для запуска" ${!overview.strategies?.length ? "disabled" : ""}>
+              ${strategyOptions || "<option>Стратегии не найдены</option>"}
+            </select>
+            ${runtime.running
+              ? `<button class="button button-danger" type="button" data-action="stop" ${!isWindowsSupported() || busyAttribute()}>Остановить winws.exe</button>`
+              : `<button class="button button-primary" type="button" data-action="launch-selected" ${launchDisabled}>Запустить стратегию <span>→</span></button>`}
+          </div>
+        </article>
+
+        <div class="metrics-grid">
+          <article class="card metric-card">
+            <div class="metric-top"><span class="metric-icon green">◉</span><span class="metric-label">Процесс</span></div>
+            <b class="metric-value">${overview.runtime?.processRunning ? "Работает" : overview.runtime?.processRunning === false ? "Остановлен" : "—"}</b>
+            <span class="metric-detail">winws.exe</span>
+          </article>
+          <article class="card metric-card">
+            <div class="metric-top"><span class="metric-icon purple">⚙</span><span class="metric-label">Служба</span></div>
+            <b class="metric-value">${serviceLabel(overview.runtime)}</b>
+            <span class="metric-detail">${escapeHtml(overview.runtime?.serviceStrategy || "Автозапуск не выбран")}</span>
+          </article>
+          <article class="card metric-card">
+            <div class="metric-top"><span class="metric-icon yellow">⌁</span><span class="metric-label">Игровой фильтр</span></div>
+            <b class="metric-value">${gameModeLabel(overview.gameFilter)}</b>
+            <span class="metric-detail">TCP ${escapeHtml(overview.gameFilter?.tcp || "—")} · UDP ${escapeHtml(overview.gameFilter?.udp || "—")}</span>
+          </article>
+          <article class="card metric-card">
+            <div class="metric-top"><span class="metric-icon">↻</span><span class="metric-label">Версия</span></div>
+            <b class="metric-value">${escapeHtml(overview.version || "Не найдена")}</b>
+            <span class="metric-detail">${overview.autoUpdate ? "Проверка обновлений включена" : "Проверка обновлений выключена"}</span>
+          </article>
+        </div>
+
+        <div class="dashboard-bottom-grid">
+          <article class="card card-pad">
+            <div class="card-heading">
+              <div><div class="kicker">Проверка среды</div><h2>Текущее состояние</h2></div>
+              <button class="button button-ghost button-small" type="button" data-action="refresh" ${busyAttribute()}>Обновить</button>
+            </div>
+            <div class="status-list">
+              <div class="status-row"><i class="tiny-dot ${processDot}"></i><div><b>Обход трафика</b><span>Фоновый процесс winws.exe</span></div><span class="value">${overview.runtime?.processRunning ? "активен" : overview.runtime?.processRunning === false ? "не запущен" : "недоступно"}</span></div>
+              <div class="status-row"><i class="tiny-dot ${serviceDot}"></i><div><b>Служба zapret</b><span>Стратегия для автозапуска</span></div><span class="value">${escapeHtml(overview.runtime?.serviceStrategy || serviceLabel(overview.runtime))}</span></div>
+              <div class="status-row"><i class="tiny-dot ${overview.ipset?.mode === "loaded" ? "green" : overview.ipset?.mode === "any" ? "yellow" : "cyan"}"></i><div><b>IPSet-фильтр</b><span>Правила для IP-адресов</span></div><span class="value">${escapeHtml(ipsetLabel(overview.ipset))}${overview.ipset?.entries !== null ? ` · ${overview.ipset.entries}` : ""}</span></div>
+              <div class="status-row"><i class="tiny-dot ${overview.autoUpdate ? "green" : "yellow"}"></i><div><b>Проверка обновлений</b><span>Встроенная проверка upstream</span></div><span class="value">${overview.autoUpdate ? "включена" : "выключена"}</span></div>
+            </div>
+          </article>
+          <aside class="card card-pad">
+            <div class="card-heading"><div><div class="kicker">Важно</div><h2>Перед запуском</h2></div></div>
+            <div class="info-callout"><span class="callout-icon">i</span><div><strong>Secure DNS.</strong> Для YouTube и Discord upstream рекомендует предварительно включить безопасный DNS в браузере или Windows.</div></div>
+            <div class="button-row" style="margin-top: 14px"><button class="button button-secondary button-small" type="button" data-view-shortcut="strategies">Выбрать стратегию</button><button class="button button-ghost button-small" type="button" data-view-shortcut="updates">Проверить обновления</button></div>
+          </aside>
+        </div>
+      </section>`;
+  }
+
+  function strategyMeta(strategy) {
+    const upper = strategy.toUpperCase();
+    if (/^GENERAL\.BAT$/i.test(strategy)) return { tag: "Базовая", tagClass: "primary", text: "Стандартная стратегия upstream для первого запуска." };
+    if (upper.includes("EXP")) return { tag: "Эксперимент", tagClass: "warning", text: "Экспериментальный профиль. Пробуйте только при необходимости." };
+    if (upper.includes("FAKE")) return { tag: "Fake TLS", tagClass: "warning", text: "Профиль с автоматической или альтернативной TLS-подменой." };
+    if (upper.includes("SIMPLE")) return { tag: "Простой", tagClass: "", text: "Упрощённый вариант с другим набором параметров." };
+    if (upper.includes("ALT")) return { tag: "Альтернатива", tagClass: "", text: "Альтернативный профиль для проверки у вашего провайдера." };
+    return { tag: "Профиль", tagClass: "", text: "Стратегия из подключённой папки upstream." };
+  }
+
+  function renderStrategies(overview) {
+    const strategies = overview.strategies || [];
+    const cards = strategies
+      .map((strategy) => {
+        const meta = strategyMeta(strategy);
+        const selected = strategy === state.selectedStrategy;
+        return `
+          <article class="card strategy-card ${selected ? "is-selected" : ""}">
+            <div class="strategy-card-top"><span class="strategy-name" title="${escapeHtml(strategy)}">${escapeHtml(strategy.replace(/\.bat$/i, ""))}</span><span class="tag ${meta.tagClass}">${meta.tag}</span></div>
+            <p>${meta.text}</p>
+            <div class="button-row">
+              <button class="button ${selected ? "button-secondary" : "button-ghost"} button-small" type="button" data-action="select-strategy" data-strategy="${escapeHtml(strategy)}">${selected ? "Выбрана" : "Выбрать"}</button>
+              <button class="button button-primary button-small" type="button" data-action="run-strategy" data-strategy="${escapeHtml(strategy)}" ${!isWindowsSupported() || busyAttribute()}>Запустить</button>
+            </div>
+          </article>`;
+      })
+      .join("");
+
+    return `
+      <section class="page">
+        ${platformBanner()}
+        <div class="page-heading">
+          <div><div class="kicker">Профили upstream</div><h1>Стратегии запуска</h1><p>Выберите профиль под вашу сеть. Интерфейс запускает исходный .bat-файл от имени администратора — параметры скриптов не переписываются.</p></div>
+          <div class="button-row"><button class="button button-ghost" type="button" data-action="service-manager">Управление службой ↗</button></div>
+        </div>
+        <div class="info-callout warning" style="margin-bottom:17px"><span class="callout-icon">!</span><div><strong>Одна стратегия за раз.</strong> Перед сменой профиля остановите запущенный winws.exe. Для постоянного автозапуска используйте исходный менеджер службы.</div></div>
+        <div class="strategy-counter">Найдено профилей: ${strategies.length}${state.selectedStrategy ? ` · выбрано: <b>${escapeHtml(state.selectedStrategy.replace(/\.bat$/i, ""))}</b>` : ""}</div>
+        ${strategies.length ? `<div class="strategy-grid">${cards}</div>` : `<div class="card card-pad"><div class="info-callout danger"><span class="callout-icon">!</span><div><strong>Скрипты не найдены.</strong> В корне папки должны находиться файлы general*.bat. Укажите корректную распакованную папку.</div></div></div>`}
+      </section>`;
+  }
+
+  function renderLists(overview) {
+    if (state.listsLoading) return renderLoading("Загружаем пользовательские списки…");
+    const lists = state.lists || FALLBACK_LISTS;
+    const availableKeys = Object.keys(lists);
+    const selectedKey = availableKeys.includes(state.selectedList) ? state.selectedList : availableKeys[0];
+    state.selectedList = selectedKey;
+    const selected = lists[selectedKey];
+    const tabs = availableKeys
+      .map(
+        (key) => {
+          const item = lists[key];
+          return `<button class="list-tab ${key === selectedKey ? "is-active" : ""}" type="button" data-action="select-list" data-list-key="${escapeHtml(key)}"><b>${escapeHtml(item.title)}</b><small>${escapeHtml(item.subtitle)}</small></button>`;
+        },
+      )
+      .join("");
+    const lines = String(selected.content || "").split(/\r?\n/).filter((line) => line.length).length;
+
+    return `
+      <section class="page">
+        <div class="page-heading">
+          <div><div class="kicker">Персональные правила</div><h1>Пользовательские списки</h1><p>Эти файлы подключаются upstream автоматически. Дифференциальное обновление никогда не заменяет <b>*-user.txt</b>, поэтому добавленные правила сохраняются.</p></div>
+          <div class="button-row"><button class="button button-ghost" type="button" data-action="open-folder">Открыть папку</button></div>
+        </div>
+        <div class="list-layout">
+          <aside class="card list-tabs">${tabs}</aside>
+          <article class="card list-editor">
+            <div><div class="kicker">${selected.exists ? "Локальный файл" : "Будет создан при сохранении"}</div><h2>${escapeHtml(selected.title)}</h2></div>
+            <p>${escapeHtml(selected.subtitle)}. Один элемент на строку; комментарии начинайте с #.</p>
+            <textarea class="textarea-control" id="user-list-content" spellcheck="false" placeholder="${escapeHtml(selected.placeholder || "")}">${escapeHtml(selected.content || "")}</textarea>
+            <footer class="editor-footer"><span id="list-line-count">Строк с содержимым: ${lines}</span><button class="button button-primary" type="button" data-action="save-list" ${busyAttribute()}>Сохранить список</button></footer>
+          </article>
+        </div>
+      </section>`;
+  }
+
+  function progressPercent(progress) {
+    if (!progress) return 0;
+    if (progress.phase === "done") return 100;
+    if (!progress.total) return progress.phase === "checking" ? 15 : 5;
+    return Math.min(96, Math.max(2, Math.round((progress.current / progress.total) * 100)));
+  }
+
+  function progressDescription(progress) {
+    if (!progress) return "Готов к проверке.";
+    const suffix = progress.path ? ` · ${progress.path}` : "";
+    return `${progress.label || "Выполняем операцию"}${suffix}`;
+  }
+
+  function actionLabel(action) {
+    const labels = { add: "добавить", replace: "заменить", delete: "удалить" };
+    return labels[action.kind] || action.kind;
+  }
+
+  function renderUpdateIntro(overview) {
+    const result = state.lastUpdateResult;
+    return `
+      <section class="page">
+        <div class="page-heading">
+          <div><div class="kicker">Безопасная синхронизация</div><h1>Обновления без полной замены</h1><p>Сначала сверяем Git SHA каждого файла. Затем скачиваем и заменяем только те, которые действительно изменились в upstream.</p></div>
+          <div class="button-row"><button class="button button-ghost" type="button" data-action="open-upstream">Страница upstream ↗</button></div>
+        </div>
+        ${result ? `<div class="info-callout" style="margin-bottom:17px"><span class="callout-icon">✓</span><div><strong>Обновление завершено.</strong> Обработано файлов: ${result.applied.length}. ${result.backupSession ? `Резервная копия создана в профиле приложения: ${escapeHtml(result.backupSession)}.` : "Файлы уже были актуальны."}</div></div>` : ""}
+        <div class="update-overview">
+          <article class="card update-hero">
+            <div class="kicker">Текущая установка</div>
+            <div class="version-pair"><div class="version-box"><span>Локальная версия</span><b>${escapeHtml(overview.version || "не найдена")}</b></div><div class="version-arrow">→</div><div class="version-box"><span>Upstream</span><b>Проверить GitHub</b></div></div>
+            <button class="button button-primary" type="button" data-action="check-updates" ${busyAttribute()}>Проверить обновления <span>↻</span></button>
+          </article>
+          ${renderProgressPanel()}
+        </div>
+        <div class="dashboard-bottom-grid">
+          <article class="card card-pad"><div class="card-heading"><div><div class="kicker">Как это работает</div><h2>Никаких архивов поверх папки</h2></div></div><div class="status-list"><div class="status-row"><i class="tiny-dot green"></i><div><b>Сверка по Git SHA</b><span>Определяем точный список изменений</span></div><span class="value">до скачивания</span></div><div class="status-row"><i class="tiny-dot green"></i><div><b>Только изменённые файлы</b><span>Загрузка и staging перед применением</span></div><span class="value">точечно</span></div><div class="status-row"><i class="tiny-dot green"></i><div><b>Резервная копия</b><span>Предыдущая версия каждого затронутого файла</span></div><span class="value">до 10 сессий</span></div></div></article>
+          <aside class="card card-pad"><div class="card-heading"><div><div class="kicker">Защищено</div><h2>Ваши настройки</h2></div></div><div class="info-callout"><span class="callout-icon">✓</span><div><strong>Всегда сохраняются:</strong> lists/*-user.txt, текущий IPSet, резервный IPSet и флаги фильтров. При конфликте остальных файлов выбор остаётся за вами.</div></div></aside>
+        </div>
+      </section>`;
+  }
+
+  function renderProgressPanel() {
+    const progress = state.updateProgress;
+    const percentage = progressPercent(progress);
+    return `<aside class="card progress-panel"><div class="kicker">Статус операции</div><h3>${progress?.phase === "done" ? "Операция завершена" : state.checkingUpdate || state.busy === "update" ? "Выполняется" : "Ожидание"}</h3><p>${escapeHtml(progressDescription(progress))}</p><div class="progress-track"><span style="width:${percentage}%"></span></div><span class="progress-meta">${progress?.total ? `${progress.current || 0} из ${progress.total}` : "—"}</span></aside>`;
+  }
+
+  function renderUpdatePlan(overview, plan) {
+    const actionItems = plan.actions.length
+      ? plan.actions.map((action) => `<li><span title="${escapeHtml(action.path)}">${escapeHtml(action.path)}</span><em>${escapeHtml(actionLabel(action))}</em></li>`).join("")
+      : "<li><span>Нет файлов для применения</span><em>готово</em></li>";
+    const conflictItems = plan.conflicts.length
+      ? plan.conflicts.map((conflict) => `<li><span title="${escapeHtml(conflict.path)}">${escapeHtml(conflict.path)}</span><strong>${escapeHtml(conflict.reason)}</strong></li>`).join("")
+      : "<li><span>Конфликтов нет</span></li>";
+    const preservedItems = plan.preserved.length
+      ? plan.preserved.map((file) => `<li><span title="${escapeHtml(file.path)}">${escapeHtml(file.path)}</span><em>сохранён</em></li>`).join("")
+      : "<li><span>Нет отдельных защищённых файлов</span></li>";
+    const resolvableConflicts = plan.conflicts.filter((conflict) => conflict.suggestedAction).length;
+
+    return `
+      <section class="page">
+        <div class="page-heading">
+          <div><div class="kicker">Результат проверки</div><h1>Найдены изменения upstream</h1><p>Источник: ${escapeHtml(plan.upstream.repository)} · ветка ${escapeHtml(plan.upstream.branch)}. Список ниже собран до начала загрузки файлов.</p></div>
+          <div class="button-row"><button class="button button-ghost" type="button" data-action="check-updates" ${busyAttribute()}>Проверить ещё раз</button></div>
+        </div>
+        ${plan.initial ? `<div class="info-callout warning first-sync-note"><span class="callout-icon">!</span><div><strong>Первая синхронизация.</strong> У этой папки ещё нет эталонного манифеста интерфейса. Будут затронуты только перечисленные файлы; пользовательские списки и текущие фильтры исключены.</div></div>` : ""}
+        <div class="update-overview" style="margin-top:17px">
+          <article class="card update-hero">
+            <div class="kicker">Версии</div>
+            <div class="version-pair"><div class="version-box"><span>Локальная</span><b>${escapeHtml(plan.localVersion || overview.version || "не найдена")}</b></div><div class="version-arrow">→</div><div class="version-box"><span>В upstream</span><b>${escapeHtml(plan.upstream.version || plan.upstream.release?.tag || "ветка main")}</b></div></div>
+            <div class="button-row"><button class="button button-primary" type="button" data-action="apply-update" ${(!plan.actions.length && !plan.initial) || busyAttribute()}>${plan.actions.length ? `Обновить ${plan.actions.length} ${pluralFiles(plan.actions.length)}` : plan.initial ? "Зафиксировать состояние" : "Нет изменений"}</button>${resolvableConflicts ? `<button class="button button-danger" type="button" data-action="force-update" ${busyAttribute()}>Взять upstream для ${resolvableConflicts} ${pluralFiles(resolvableConflicts)}</button>` : ""}</div>
+          </article>
+          ${renderProgressPanel()}
+        </div>
+        <div class="update-summary-grid">
+          <article class="card update-stat"><b>${plan.summary.update}</b><span>точечных изменений</span></article>
+          <article class="card update-stat"><b>${plan.summary.conflicts}</b><span>конфликтов для проверки</span></article>
+          <article class="card update-stat"><b>${plan.summary.protected}</b><span>защищённых настроек</span></article>
+          <article class="card update-stat"><b>${plan.summary.current}</b><span>файлов без изменений</span></article>
+        </div>
+        <div class="update-details">
+          <details open><summary>Будет обработано: ${plan.actions.length}</summary><ul class="file-list">${actionItems}</ul></details>
+          <details><summary>Конфликты: ${plan.conflicts.length}</summary><ul class="file-list conflict">${conflictItems}</ul></details>
+          <details><summary>Защищённые настройки: ${plan.preserved.length}</summary><ul class="file-list">${preservedItems}</ul></details>
+        </div>
+        <div class="info-callout" style="margin-top:17px"><span class="callout-icon">i</span><div><strong>Перед заменой создаётся копия.</strong> Каждый изменяемый файл сначала скачивается во временную область и проверяется по Git SHA. При ошибке уже применённые файлы автоматически откатываются.</div></div>
+      </section>`;
+  }
+
+  function pluralFiles(value) {
+    const mod10 = value % 10;
+    const mod100 = value % 100;
+    if (mod10 === 1 && mod100 !== 11) return "файл";
+    if (mod10 >= 2 && mod10 <= 4 && !(mod100 >= 12 && mod100 <= 14)) return "файла";
+    return "файлов";
+  }
+
+  function renderUpdates(overview) {
+    if (state.checkingUpdate) return renderLoading("Проверяем Git SHA файлов в upstream…");
+    if (state.updatePlan) return renderUpdatePlan(overview, state.updatePlan);
+    return renderUpdateIntro(overview);
+  }
+
+  function renderService(overview) {
+    const game = overview.gameFilter || { mode: "disabled", tcp: "1024-65535", udp: "1024-65535" };
+    const runtime = overview.runtime || {};
+    const modes = [
+      ["disabled", "Выключен"],
+      ["all", "TCP + UDP"],
+      ["tcp", "Только TCP"],
+      ["udp", "Только UDP"],
+    ];
+    const gameOptions = modes.map(([value, label]) => `<option value="${value}" ${game.mode === value ? "selected" : ""}>${label}</option>`).join("");
+    const ipsetModes = [
+      ["loaded", "Список"],
+      ["none", "Нет"],
+      ["any", "Любой IP"],
+    ];
+
+    return `
+      <section class="page">
+        ${platformBanner()}
+        <div class="page-heading">
+          <div><div class="kicker">Автозапуск и параметры</div><h1>Служба и фильтры</h1><p>Изменения в этих настройках совместимы с service.bat upstream. После изменения фильтра перезапустите выбранную стратегию или службу.</p></div>
+          <div class="button-row"><button class="button button-secondary" type="button" data-action="service-manager" ${!isWindowsSupported() || busyAttribute()}>Открыть service.bat ↗</button></div>
+        </div>
+        <div class="settings-layout">
+          <div class="settings-stack">
+            <article class="card service-status-card">
+              <div class="card-heading"><div><div class="kicker">Состояние службы</div><h2>${escapeHtml(serviceLabel(runtime))}</h2><p>${escapeHtml(runtime.serviceStrategy ? `Установлена стратегия: ${runtime.serviceStrategy}` : "Для установки стратегии в автозапуск используйте исходный сервисный менеджер.")}</p></div><span class="metric-icon ${runtime.serviceRunning ? "green" : "yellow"}">⚙</span></div>
+              <div class="service-pill-row"><span class="service-pill"><i class="tiny-dot ${runtime.processRunning ? "green" : "red"}"></i>winws.exe ${runtime.processRunning ? "активен" : "не запущен"}</span><span class="service-pill"><i class="tiny-dot ${runtime.serviceInstalled ? "green" : "yellow"}"></i>служба ${runtime.serviceInstalled ? "найдена" : "не установлена"}</span><span class="service-pill"><i class="tiny-dot ${overview.autoUpdate ? "green" : "yellow"}"></i>проверка ${overview.autoUpdate ? "включена" : "выключена"}</span></div>
+              <div class="button-row"><button class="button button-primary" type="button" data-action="service-manager" ${!isWindowsSupported() || busyAttribute()}>Управлять службой</button><button class="button button-ghost" type="button" data-action="open-folder">Открыть файлы</button>${overview.runtime?.processRunning ? `<button class="button button-danger" type="button" data-action="stop" ${!isWindowsSupported() || busyAttribute()}>Остановить процесс</button>` : ""}</div>
+            </article>
+
+            <article class="card card-pad">
+              <div class="card-heading"><div><div class="kicker">Game Filter</div><h2>Игровой фильтр</h2><p>Определяет, будут ли TCP/UDP-порты выше 1023 добавлены в обработку.</p></div></div>
+              <div class="form-grid">
+                <label class="form-field"><span class="field-label">Режим</span><select class="select-control" id="game-mode">${gameOptions}</select></label>
+                <label class="form-field"><span class="field-label">TCP-порты <span class="field-hint">1–65535</span></span><input class="text-input" id="game-tcp" value="${escapeHtml(game.tcp)}" spellcheck="false" /></label>
+                <label class="form-field"><span class="field-label">UDP-порты <span class="field-hint">1–65535</span></span><input class="text-input" id="game-udp" value="${escapeHtml(game.udp)}" spellcheck="false" /></label>
+              </div>
+              <div class="button-row" style="margin-top:15px"><button class="button button-primary" type="button" data-action="save-game-filter" ${busyAttribute()}>Сохранить фильтр</button><span class="muted" style="font-size:11px">Изменения применятся после перезапуска zapret.</span></div>
+            </article>
+          </div>
+
+          <div class="settings-stack">
+            <article class="card card-pad">
+              <div class="card-heading"><div><div class="kicker">IPSet Filter</div><h2>${escapeHtml(ipsetLabel(overview.ipset))}</h2><p>${overview.ipset?.entries !== null ? `Строк в текущем файле: ${overview.ipset.entries}.` : "Состояние файла не определено."}</p></div></div>
+              <div class="segmented">${ipsetModes.map(([mode, label]) => `<button type="button" class="${overview.ipset?.mode === mode ? "is-active" : ""}" data-action="set-ipset" data-mode="${mode}" ${busyAttribute()}>${label}</button>`).join("")}</div>
+              <div class="info-callout warning" style="margin-top:14px"><span class="callout-icon">!</span><div><strong>«Любой IP» может ломать сайты.</strong> Используйте этот режим только для диагностики. При переключении из загруженного списка его копия сохраняется в ipset-all.txt.backup.</div></div>
+            </article>
+            <article class="card card-pad">
+              <div class="toggle-row"><div class="toggle-copy"><b>Проверка обновлений в upstream</b><span>Флаг utils/check_updates.enabled для обычных .bat-скриптов.</span></div><button class="switch ${overview.autoUpdate ? "is-on" : ""}" type="button" data-action="toggle-auto-update" aria-pressed="${overview.autoUpdate}" ${busyAttribute()}></button></div>
+              <div class="toggle-row"><div class="toggle-copy"><b>Подключённая папка</b><span title="${escapeHtml(overview.root || "")}">${escapeHtml(overview.root || "—")}</span></div></div>
+              <div class="button-row"><button class="button button-ghost button-small" type="button" data-action="choose-root">Сменить папку</button><button class="button button-danger button-small" type="button" data-action="forget-root">Отключить</button></div>
+            </article>
+            <article class="card card-pad"><div class="card-heading"><div><div class="kicker">Диагностика</div><h2>Исходные инструменты</h2></div></div><p class="muted" style="font-size:12px;line-height:1.55;margin-top:0">В upstream уже есть диагностика, тестирование стратегий, обновление hosts и установка службы. Откройте исходный менеджер, чтобы использовать эти административные инструменты.</p><button class="button button-secondary" type="button" data-action="service-manager" ${!isWindowsSupported() || busyAttribute()}>Открыть service.bat</button></article>
+          </div>
+        </div>
+      </section>`;
+  }
+
+  function render() {
+    updateChrome();
+    if (!state.overview) {
+      content.innerHTML = renderLoading();
+      return;
+    }
+    if (!isConfigured()) {
+      content.innerHTML = renderOnboarding();
+      return;
+    }
+
+    const renderers = {
+      dashboard: renderDashboard,
+      strategies: renderStrategies,
+      lists: renderLists,
+      updates: renderUpdates,
+      service: renderService,
+    };
+    content.innerHTML = (renderers[state.view] || renderDashboard)(state.overview);
+  }
+
+  function showToast(message, type = "success") {
+    const element = document.createElement("div");
+    element.className = `toast ${type === "error" ? "error" : type === "warning" ? "warning" : ""}`;
+    const icon = type === "error" ? "!" : type === "warning" ? "!" : "✓";
+    element.innerHTML = `<span class="toast-icon">${icon}</span><span class="toast-copy"></span><button class="toast-close" type="button" aria-label="Закрыть">×</button>`;
+    element.querySelector(".toast-copy").textContent = message;
+    element.querySelector(".toast-close").addEventListener("click", () => element.remove());
+    toastStack.append(element);
+    setTimeout(() => element.remove(), 6000);
+  }
+
+  function confirmAction({ title, message, label = "Подтвердить", danger = false, kicker = "Подтверждение" }) {
+    return new Promise((resolve) => {
+      confirmKicker.textContent = kicker;
+      confirmTitle.textContent = title;
+      confirmMessage.textContent = message;
+      confirmSubmit.textContent = label;
+      confirmSubmit.className = `button ${danger ? "button-danger" : "button-primary"}`;
+      const onClose = () => resolve(confirmDialog.returnValue === "confirm");
+      confirmDialog.addEventListener("close", onClose, { once: true });
+      confirmDialog.showModal();
+    });
+  }
+
+  async function refreshOverview({ silent = false } = {}) {
+    try {
+      state.overview = await request("getOverview");
+      ensureStrategy();
+      if (!silent) showToast("Состояние обновлено.");
+      render();
+    } catch (error) {
+      showToast(error.message, "error");
+      render();
+    }
+  }
+
+  async function loadLists() {
+    if (!isConfigured() || state.listsLoading) return;
+    state.listsLoading = true;
+    render();
+    try {
+      state.lists = await request("getUserLists");
+    } catch (error) {
+      showToast(error.message, "error");
+    } finally {
+      state.listsLoading = false;
+      render();
+    }
+  }
+
+  async function switchView(view) {
+    if (!VIEW_TITLES[view]) return;
+    state.view = view;
+    render();
+    if (view === "lists" && !state.lists) await loadLists();
+  }
+
+  async function withBusy(label, callback) {
+    if (state.busy) return;
+    state.busy = label;
+    render();
+    try {
+      return await callback();
+    } catch (error) {
+      showToast(error.message || "Операция не выполнена.", "error");
+      return null;
+    } finally {
+      state.busy = null;
+      render();
+    }
+  }
+
+  async function handleAction(action, source) {
+    if (!action) return;
+
+    if (action === "choose-root") {
+      await withBusy("root", async () => {
+        const response = await request("chooseRoot");
+        if (!response.canceled) {
+          state.overview = response.overview;
+          state.lists = null;
+          state.updatePlan = null;
+          state.lastUpdateResult = null;
+          ensureStrategy();
+          showToast("Папка zapret подключена.");
+        }
+      });
+      return;
+    }
+
+    if (action === "forget-root") {
+      const confirmed = await confirmAction({
+        title: "Отключить папку zapret?",
+        message: "Интерфейс просто забудет путь. Файлы upstream, служба и настройки не будут удалены.",
+        label: "Отключить",
+        danger: true,
+      });
+      if (!confirmed) return;
+      await withBusy("forget", async () => {
+        state.overview = await request("forgetRoot");
+        state.lists = null;
+        state.updatePlan = null;
+        showToast("Путь отключён. Файлы не изменялись.");
+      });
+      return;
+    }
+
+    if (action === "refresh") {
+      await withBusy("refresh", () => refreshOverview({ silent: false }));
+      return;
+    }
+
+    if (action === "open-upstream") {
+      try {
+        await request("openUpstream");
+      } catch (error) {
+        showToast(error.message, "error");
+      }
+      return;
+    }
+
+    if (action === "open-folder") {
+      try {
+        await request("openFolder");
+      } catch (error) {
+        showToast(error.message, "error");
+      }
+      return;
+    }
+
+    if (action === "select-strategy") {
+      state.selectedStrategy = source.dataset.strategy || null;
+      render();
+      return;
+    }
+
+    if (action === "launch-selected" || action === "run-strategy") {
+      const strategy = action === "run-strategy" ? source.dataset.strategy : state.selectedStrategy;
+      if (!strategy) {
+        showToast("Сначала выберите стратегию.", "warning");
+        return;
+      }
+      const confirmed = await confirmAction({
+        title: `Запустить ${strategy.replace(/\.bat$/i, "")}?`,
+        message: "Windows запросит права администратора для запуска winws.exe. Если уже работает другая стратегия, сначала остановите её.",
+        label: "Запустить",
+        kicker: "Запуск стратегии",
+      });
+      if (!confirmed) return;
+      await withBusy("launch", async () => {
+        await request("launch", strategy);
+        showToast("Запрос на запуск отправлен. Подтвердите UAC в Windows.");
+        setTimeout(() => refreshOverview({ silent: true }), 1400);
+      });
+      return;
+    }
+
+    if (action === "stop") {
+      const confirmed = await confirmAction({
+        title: "Остановить winws.exe?",
+        message: "Будет остановлен только ручной процесс winws.exe. Установленная служба управляется через исходный service.bat.",
+        label: "Остановить",
+        danger: true,
+      });
+      if (!confirmed) return;
+      await withBusy("stop", async () => {
+        await request("stop");
+        showToast("Запрос на остановку отправлен. Подтвердите UAC в Windows.");
+        setTimeout(() => refreshOverview({ silent: true }), 1200);
+      });
+      return;
+    }
+
+    if (action === "service-manager") {
+      const confirmed = await confirmAction({
+        title: "Открыть service.bat?",
+        message: "Откроется исходный административный менеджер Flowseal. В нём доступны служба, диагностика, тесты, hosts и обновление IPSet.",
+        label: "Открыть менеджер",
+        kicker: "Инструменты upstream",
+      });
+      if (!confirmed) return;
+      await withBusy("service", async () => {
+        await request("openServiceManager");
+        showToast("Менеджер запускается. Подтвердите UAC в Windows.");
+      });
+      return;
+    }
+
+    if (action === "select-list") {
+      state.selectedList = source.dataset.listKey || "general";
+      render();
+      return;
+    }
+
+    if (action === "save-list") {
+      const textArea = document.getElementById("user-list-content");
+      if (!textArea) return;
+      await withBusy("list", async () => {
+        state.lists = await request("saveUserList", state.selectedList, textArea.value);
+        showToast("Пользовательский список сохранён.");
+      });
+      return;
+    }
+
+    if (action === "check-updates") {
+      if (state.checkingUpdate) return;
+      state.checkingUpdate = true;
+      state.updateProgress = { phase: "checking", label: "Подключаемся к GitHub", current: 0, total: 0 };
+      render();
+      try {
+        state.updatePlan = await request("checkUpdate");
+        state.lastUpdateResult = null;
+        showToast(
+          state.updatePlan.summary.update
+            ? `Найдено изменений: ${state.updatePlan.summary.update}.`
+            : "Новых файлов для применения не найдено.",
+        );
+      } catch (error) {
+        showToast(error.message, "error");
+      } finally {
+        state.checkingUpdate = false;
+        render();
+      }
+      return;
+    }
+
+    if (action === "apply-update" || action === "force-update") {
+      const plan = state.updatePlan;
+      if (!plan) return;
+      const force = action === "force-update";
+      const conflicts = force ? plan.conflicts.filter((item) => item.suggestedAction).map((item) => item.path) : [];
+      const normalCount = plan.actions.length;
+      const title = force ? "Применить обновление и перезаписать конфликты?" : "Применить точечное обновление?";
+      const message = force
+        ? `Будет обработано ${normalCount} ${pluralFiles(normalCount)} и заменено ${conflicts.length} конфликтных ${pluralFiles(conflicts.length)} версией из upstream. Перед этим сохранятся копии прежних файлов.`
+        : normalCount
+          ? `Будет обработано ${normalCount} ${pluralFiles(normalCount)}. Архив поверх папки не распаковывается; пользовательские списки и фильтры не затрагиваются.`
+          : "Файлы уже совпадают с upstream. Будет создан только эталонный манифест, чтобы следующие обновления корректно находили конфликты локальных правок.";
+      const confirmed = await confirmAction({
+        title,
+        message,
+        label: force ? "Перезаписать конфликтные" : "Применить обновление",
+        danger: force,
+        kicker: force ? "Внимание: локальные изменения" : "Дифференциальное обновление",
+      });
+      if (!confirmed) return;
+
+      await withBusy("update", async () => {
+        state.updateProgress = { phase: "download", label: "Готовим обновление", current: 0, total: normalCount + conflicts.length };
+        render();
+        const result = await request("applyUpdate", {
+          fingerprint: plan.fingerprint,
+          forceConflictPaths: conflicts,
+        });
+        state.lastUpdateResult = result;
+        state.updatePlan = null;
+        await refreshOverview({ silent: true });
+        showToast(`Готово: обработано ${result.applied.length} ${pluralFiles(result.applied.length)}.`);
+      });
+      return;
+    }
+
+    if (action === "save-game-filter") {
+      const mode = document.getElementById("game-mode")?.value;
+      const tcp = document.getElementById("game-tcp")?.value;
+      const udp = document.getElementById("game-udp")?.value;
+      await withBusy("game", async () => {
+        await request("setGameFilter", { mode, tcp, udp });
+        await refreshOverview({ silent: true });
+        showToast("Настройка Game Filter сохранена. Перезапустите zapret.");
+      });
+      return;
+    }
+
+    if (action === "set-ipset") {
+      const mode = source.dataset.mode;
+      const text = mode === "any"
+        ? "Режим «Любой IP» может затронуть обычные сайты. Используйте его только временно для проверки."
+        : mode === "none"
+          ? "Текущий загруженный список будет сохранён в резервную копию, а обработка IPSet отключится."
+          : "Будет восстановлен сохранённый загруженный список IPSet.";
+      const confirmed = await confirmAction({
+        title: `Переключить IPSet: ${mode === "loaded" ? "Список" : mode === "none" ? "Нет" : "Любой IP"}?`,
+        message: text,
+        label: "Переключить",
+        danger: mode === "any",
+        kicker: "IPSet Filter",
+      });
+      if (!confirmed) return;
+      await withBusy("ipset", async () => {
+        await request("setIpSetMode", mode);
+        await refreshOverview({ silent: true });
+        showToast("Режим IPSet изменён. Перезапустите zapret.");
+      });
+      return;
+    }
+
+    if (action === "toggle-auto-update") {
+      await withBusy("autoupdate", async () => {
+        const enabled = await request("setAutoUpdate", !state.overview.autoUpdate);
+        state.overview.autoUpdate = enabled;
+        showToast(enabled ? "Проверка обновлений включена." : "Проверка обновлений выключена.");
+      });
+      return;
+    }
+  }
+
+  document.addEventListener("click", (event) => {
+    const nav = event.target.closest("[data-view]");
+    if (nav) {
+      switchView(nav.dataset.view);
+      return;
+    }
+    const shortcut = event.target.closest("[data-view-shortcut]");
+    if (shortcut) {
+      switchView(shortcut.dataset.viewShortcut);
+      return;
+    }
+    const target = event.target.closest("[data-action]");
+    if (target) handleAction(target.dataset.action, target);
+  });
+
+  document.addEventListener("change", (event) => {
+    if (event.target.id === "quick-strategy") {
+      state.selectedStrategy = event.target.value;
+    }
+  });
+
+  document.addEventListener("input", (event) => {
+    if (event.target.id === "user-list-content") {
+      const lineCount = event.target.value.split(/\r?\n/).filter((line) => line.length).length;
+      const target = document.getElementById("list-line-count");
+      if (target) target.textContent = `Строк с содержимым: ${lineCount}`;
+    }
+  });
+
+  api.onUpdateProgress((progress) => {
+    state.updateProgress = progress;
+    if (state.view === "updates" || state.checkingUpdate || state.busy === "update") render();
+  });
+
+  refreshOverview({ silent: true });
+})();
+
+</script>
+  </body>
+</html>
