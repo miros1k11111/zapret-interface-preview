@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'none'; base-uri 'none'; form-action 'none'"
+    />
+    <title>Zapret Control Center</title>
+    <link rel="stylesheet" href="./styles.css" />
+      <meta name="description" content="Интерактивный предпросмотр Zapret Control Center" />
+  </head>
+  <body>
+    <div class="ambient ambient-one"></div>
+    <div class="ambient ambient-two"></div>
+    <div class="app-shell">
+      <aside class="sidebar" aria-label="Основная навигация">
+        <div class="brand">
+          <div class="brand-mark" aria-hidden="true">
+            <svg viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M18 3.5 30.5 8v8.9c0 7.9-5 13-12.5 15.6C10.5 29.9 5.5 24.8 5.5 16.9V8L18 3.5Z" stroke="currentColor" stroke-width="2.5"/>
+              <path d="m11.7 18.1 4 4 8.6-9" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <div>
+            <strong>Zapret</strong>
+            <span>CONTROL CENTER</span>
+          </div>
+        </div>
+
+        <nav class="nav-list">
+          <button class="nav-item is-active" type="button" data-view="dashboard">
+            <span class="nav-icon">◈</span><span>Обзор</span>
+          </button>
+          <button class="nav-item" type="button" data-view="strategies">
+            <span class="nav-icon">⌁</span><span>Стратегии</span>
+          </button>
+          <button class="nav-item" type="button" data-view="lists">
+            <span class="nav-icon">☷</span><span>Списки</span>
+          </button>
+          <button class="nav-item" type="button" data-view="updates">
+            <span class="nav-icon">↻</span><span>Обновления</span>
+          </button>
+          <button class="nav-item" type="button" data-view="service">
+            <span class="nav-icon">⚙</span><span>Служба и фильтры</span>
+          </button>
+        </nav>
+
+        <div class="sidebar-bottom">
+          <div class="upstream-card">
+            <div class="upstream-icon">↗</div>
+            <div>
+              <b>Flowseal upstream</b>
+              <span>Официальный источник</span>
+            </div>
+            <button class="icon-button compact" type="button" data-action="open-upstream" aria-label="Открыть Flowseal на GitHub">↗</button>
+          </div>
+          <p class="sidebar-note">Интерфейс не содержит движок zapret и работает с выбранной распакованной папкой.</p>
+        </div>
+      </aside>
+
+      <main class="main-area">
+        <header class="topbar">
+          <div class="crumbs">
+            <span class="eyebrow">Локальный контроллер</span>
+            <span id="page-title">Обзор</span>
+          </div>
+          <div class="top-actions">
+            <button class="root-pill" type="button" data-action="choose-root" title="Выбрать папку zapret">
+              <span class="root-led" id="root-led"></span>
+              <span id="root-label">Папка zapret не выбрана</span>
+              <span class="root-change">Изменить</span>
+            </button>
+            <button class="icon-button" type="button" data-action="refresh" aria-label="Обновить данные" title="Обновить данные">↻</button>
+          </div>
+        </header>
+
+        <section class="content-scroll" id="content" aria-live="polite"></section>
+        <div class="pages-demo-badge" aria-label="Демонстрационный режим">DEMO · тестовые данные</div>
+      </main>
+    </div>
+
+    <div class="toast-stack" id="toast-stack" aria-live="polite" aria-atomic="true"></div>
+
+    <dialog class="confirm-dialog" id="confirm-dialog" aria-labelledby="confirm-title">
+      <form method="dialog" class="dialog-surface">
+        <div class="dialog-kicker" id="confirm-kicker">Подтверждение</div>
+        <h2 id="confirm-title">Продолжить?</h2>
+        <p id="confirm-message"></p>
+        <div class="dialog-actions">
+          <button class="button button-ghost" value="cancel">Отмена</button>
+          <button class="button button-primary" id="confirm-submit" value="confirm">Подтвердить</button>
+        </div>
+      </form>
+    </dialog>
+
+    <script src="./mock-api.js"></script>
+    <script src="./app.js"></script>
+  </body>
+</html>
